@@ -46,7 +46,8 @@ def create_user(manager: UserManager):
 def user_account_modes(manager: UserManager):
     """Pops out user account menu"""
     while True:
-        mode = input('(A)dd account / (R)emove account / (G)et account credentials\n(C)hange password / (S)how all / (L)ogout?  ').lower().strip()
+        print('User options:')
+        mode = input('(A)dd account / (R)emove account / (G)et account credentials\n(C)hange password / (S)how all / (L)ogout\n').lower().strip()
         if  mode == 'a':
             print('Enter new account credentials.')
             platform = input('Platform: ')

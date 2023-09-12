@@ -164,7 +164,6 @@ class UserAccountsManager():
 
             try:
                 decrypted_data = pickle.loads(decrypted_bytes)
-                print(decrypted_data)
                 if isinstance(decrypted_data, dict):
                     user_account = replace(UserAccount(**decrypted_data))
                     decrypted_accounts.append(user_account)
