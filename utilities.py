@@ -23,9 +23,3 @@ class Utilities:
             input("Press Enter to continue...")
         except KeyboardInterrupt:
             pass 
-
-    @staticmethod
-    def file_path(filename, folder_name='userdata'):
-        if not os.path.exists(folder_name):
-            os.makedirs(folder_name)
-        return os.path.join(folder_name, f'{filename}.json')

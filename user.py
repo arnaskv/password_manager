@@ -1,6 +1,6 @@
 import bcrypt
 import getpass
-from dataclasses import dataclass
+from dataclasses import dataclass, asdict, replace
 import base64
 import pickle
 from passlib import pwd
@@ -63,7 +63,6 @@ class UserManager:
     def get_users(self) -> list:
         users_data = self.user_handler.read_json()
         if users_data is not None:
-            # return [User(**data) for data in users_data]
             users = []
             for data in users_data:
                 users.append(User(data['username'], hashed_password=data['password']))
@@ -128,7 +127,7 @@ class UserAccountsManager():
 
         encrypted_data = []
         for account in self.accounts:
-            account_bytes= pickle.dumps(account)
+            account_bytes= pickle.dumps(asdict(account))
             encrypted_bytes = self.eh.encrypt(account_bytes)
             # Convert the encrypted bytes to Base64-encoded string
             encrypted_data.append(base64.b64encode(encrypted_bytes).decode('utf-8'))
@@ -140,6 +139,7 @@ class UserAccountsManager():
         self.fh.write_json(data)
 
     def get_salt(self) -> str:
+        """Gets salt from json or generates a new one"""
         data = self.fh.read_json()
         if data is not None:
             salt = data.get('salt')
@@ -160,8 +160,17 @@ class UserAccountsManager():
         for account in encrypted_accounts:
             decoded_bytes = base64.b64decode(account)
             decrypted_bytes = self.eh.decrypt(decoded_bytes)
-            decrypted_data = pickle.loads(decrypted_bytes)
-            decrypted_accounts.append(UserAccount(**decrypted_data))
+
+
+            try:
+                decrypted_data = pickle.loads(decrypted_bytes)
+                print(decrypted_data)
+                if isinstance(decrypted_data, dict):
+                    user_account = replace(UserAccount(**decrypted_data))
+                    decrypted_accounts.append(user_account)
+            except Exception as e:
+                print(f"Error loading decrypted data: {e}")
+
         return decrypted_accounts
 
     def add_account(self, platform: str, username: str, password: str):
@@ -179,7 +188,7 @@ class UserAccountsManager():
                 return True
         return False
 
-    def generate_secure_password(self, length: int):
+    def generate_secure_password(self, length: int=14):
         """Generates strong password of desired length"""
         return pwd.genword(length=length)
 
