@@ -51,11 +51,13 @@ class EncryptionHandler:
         """
         if salt is None:
             self.salt = self.generate_salt()
+        else:
+            self.salt = salt
 
         kdf = PBKDF2HMAC(
             algorithm=hashes.SHA256(),
             iterations=480000,
-            salt=salt,
+            salt=self.salt,
             length=32
         )
         

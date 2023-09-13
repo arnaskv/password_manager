@@ -1,5 +1,4 @@
 import sys
-import os
 import getpass
 from user import UserManager
 from utilities import Utilities
@@ -115,7 +114,7 @@ def user_account_modes(manager: UserManager):
                 print(f'Username: {credentials[0]}\nPassword: {credentials[1]}')
             Utilities.wait_for_keypress()
             # Clears the previous 3 lines
-            print("\x1b[3A\x1b[K\x1b[K\x1b[K")
+            print("\x1b[F\x1b[K\x1b[F\x1b[K\x1b[F\x1b[K")
 
         # Show all available accounts 
         elif mode == 's':
