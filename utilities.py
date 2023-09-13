@@ -1,4 +1,5 @@
 import os
+import bcrypt
 
 
 class Utilities:
@@ -23,3 +24,15 @@ class Utilities:
             input("Press Enter to continue...")
         except KeyboardInterrupt:
             pass 
+
+
+class PasswordHasher:
+    @staticmethod
+    def hash_password(password: str) -> str:
+        password_bytes = password.encode()
+        return  bcrypt.hashpw(password_bytes, bcrypt.gensalt()).decode()
+
+    @staticmethod
+    def check_password(password: str, hashed_password: str) -> bool:
+        return bcrypt.checkpw(password.encode(), hashed_password.encode())
+    

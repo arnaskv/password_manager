@@ -11,6 +11,12 @@ class FileHandler:
         self.filepath = filepath
 
     def read_json(self, mode='r'):
+        """
+        Read JSON data from the file.
+
+        Returns:
+            dict: JSON data if successful, or None if fails.
+        """
         try:
             with open(self.filepath, mode) as file:
                 data = json.load(file)
@@ -21,7 +27,8 @@ class FileHandler:
             print(f'Error decoding JSON in "{self.filepath}"')
             return None
 
-    def write_json(self, data, mode='w'):
+    def write_json(self, data: dict, mode='w'):
+        """Write data to a JSON file."""
         try:
             with open(self.filepath, mode) as file:
                 json.dump(data, file, indent=4)
@@ -31,6 +38,17 @@ class FileHandler:
 
 class EncryptionHandler:
     def __init__(self, password: bytes, salt=None):
+        """
+        Initialize an EncryptionHandler object.
+
+        Args:
+            password (bytes): The password used for key derivation.
+            salt (bytes, optional): The salt used in key derivation. If not provided, a random salt will be generated.
+
+        Attributes:
+            salt (bytes): The salt used for key derivation.
+            f (Fernet): Fernet cipher instance for encryption and decryption.
+        """
         if salt is None:
             self.salt = self.generate_salt()
 
@@ -46,13 +64,21 @@ class EncryptionHandler:
         self.f = Fernet(key)
 
     @staticmethod
-    def generate_salt():
+    def generate_salt() -> bytes:
+        """
+        Generate a random salt.
+
+        Returns:
+            bytes: A random 16-byte salt.
+        """
         return os.urandom(16) 
 
     def encrypt(self, data: bytes) -> bytes:
+        """Encrypt data with Fernet"""
         encrypted_data = self.f.encrypt(data)
         return encrypted_data
 
     def decrypt(self, encrypted_data: bytes) -> bytes:
+        """Decrypt data with Fernet"""
         decrypted_data = self.f.decrypt(encrypted_data)
         return decrypted_data

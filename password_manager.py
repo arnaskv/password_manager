@@ -1,12 +1,12 @@
 import sys
+import os
 import getpass
-import pyperclip
 from user import UserManager
 from utilities import Utilities
 
 
 def main():
-    print("Welcome to your password manager.\n")
+    print("Welcome to your password manager.")
     
     manager = UserManager()
     login_menu(manager)
@@ -15,7 +15,7 @@ def main():
 def login_menu(manager: UserManager):
     """Pops up main menu choices"""
     while True:
-        answer = input('(S)ign in / (C)reate an account / (Q)uit?  ').strip().lower()
+        answer = input('\n| (S)ign in | (C)reate an account | (Q)uit? |  ').strip().lower()
         
         if answer == 's':
             if sign_in(manager):
@@ -44,10 +44,11 @@ def create_user(manager: UserManager):
         print(f'{str(e)}.\n')
 
 def user_account_modes(manager: UserManager):
-    """Pops out user account menu"""
+    """Pops out user account menu choices"""
     while True:
-        print('User options:')
-        mode = input('(A)dd account / (R)emove account / (G)et account credentials\n(C)hange password / (S)how all / (L)ogout\n').lower().strip()
+        print('| (A)dd account | (R)emove account | (G)et account credentials |\n| (C)hange password | (S)how all | (L)ogout |')
+        mode = input().lower().strip()
+        # Add account
         if  mode == 'a':
             print('Enter new account credentials.')
             platform = input('Platform: ')
@@ -55,6 +56,7 @@ def user_account_modes(manager: UserManager):
             password = getpass.getpass('Password: ')
             manager.user_account_manager.add_account(platform, username, password)
 
+        # Change account password
         elif mode == 'c':
             print('To change account password enter.')
             platform = input('Platform: ')
@@ -64,6 +66,7 @@ def user_account_modes(manager: UserManager):
             else:
                 print('Password change failed.')
 
+        # Remove account
         elif mode == 'r':
             print('To remove account credentials enter.')
             platform = input('Platform: ')
@@ -72,6 +75,7 @@ def user_account_modes(manager: UserManager):
             else:
                 print(f'{platform.capitalize()} credentials do not exist.')
 
+        # Get account credentials
         elif mode == 'g':
             print('To get credentials enter.')
             platform = input('Platform: ')
@@ -81,13 +85,17 @@ def user_account_modes(manager: UserManager):
             else:
                 print(f'Username: {credentials[0]}\nPassword: {credentials[1]}')
             Utilities.wait_for_keypress()
+            # Clears the previous 3 lines
+            print("\x1b[3A\x1b[K\x1b[K\x1b[K")
 
+        # Show all available accounts 
         elif mode == 's':
             print('Available accounts:')
             for account in manager.user_account_manager.accounts:
                 print(account.platform)
             Utilities.wait_for_keypress()
 
+        # Logout
         elif mode == 'l':
             manager.logout()
             break
