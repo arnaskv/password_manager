@@ -1,3 +1,4 @@
+import os
 import getpass
 from dataclasses import dataclass, asdict, replace
 import base64
@@ -41,6 +42,10 @@ class User:
             raise ValueError("Password must contain at least one uppercase letter, one lowercase letter, and one digit.")
 
         self._password = value
+
+    def change_password(self, new_password: str):
+        self.password = new_password
+        self.password = PasswordHasher.hash_password(self.password)
 
     def to_dict(self):
         """Convert User object to a dictionary"""
@@ -98,15 +103,56 @@ class UserManager:
             if user.username == username and PasswordHasher.check_password(password, user.password):
                 # with username create an instance of user data handler for data access and manipulation
                 self.user_account_manager = UserAccountsManager(username, password.encode())
+                self.current_user = user
                 return username
         return None
 
-    def logout(self):
-        """Save users when logging out"""
+    def save_user_accounts(self):
+        """Save user accounts to json"""
         self.user_account_manager.save_user_accounts()
 
+    def logout(self):
+        self.current_user = None
+        self.save_user_accounts()       
+
+    def change_master_password(self):
+        """Change master password with confirmation"""
+        if self.current_user is not None:
+            password = getpass.getpass('Enter master password to confirm: ')
+            if PasswordHasher.check_password(password, self.current_user.password):
+                try:
+                    password = getpass.getpass('Enter new master password: ')
+                    self.current_user.change_password(password)
+                except ValueError as e:
+                    print(str(e))
+                else:
+                    print('Master password changed successfully.')
+            else:
+                print('Incorrect master password.')
+
     def remove_user(self):
-        pass
+        """Remove user and user data from the system with confirmation"""
+        if self.current_user is not None:
+            password = getpass.getpass('Enter master password to confirm: ')
+            if PasswordHasher.check_password(password, self.current_user.password):
+                username = self.current_user.username
+    
+                file_path = f'userdata/{username}.json'
+                if os.path.exists(file_path):
+                    os.remove(file_path)
+                    print(f"{username} data has been removed.")
+                    self.user_account_manager = None
+                else:
+                    print(f"{username} data does not exist.")
+
+                self.users.remove(self.current_user)
+                print('User removed from system.')
+
+                self.save_users()
+                return True
+            else:
+                print('Incorrect master password.')
+        return False
 
 
 @dataclass
@@ -125,7 +171,8 @@ class UserAccountsManager():
         Initializes encryption handler
         Using both handlers gets accounts data
         """
-        self.fh = FileHandler(filepath=f'userdata/{username}')
+        Utilities.create_directory('userdata')
+        self.fh = FileHandler(filepath=f'userdata/{username}.json')
         self.salt = self.get_salt()
         self.eh = EncryptionHandler(password, self.salt)
         self.accounts = self.get_user_data()
@@ -155,8 +202,7 @@ class UserAccountsManager():
             salt = data.get('salt')
             if salt is not None:
                 return bytes.fromhex(salt)
-        return EncryptionHandler.generate_salt()
-            
+        return EncryptionHandler.generate_salt()      
 
     def get_user_data(self) -> list:
         """Gets user data from json, decrypts it and converts them back to UserAccount objects"""

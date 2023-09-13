@@ -25,6 +25,12 @@ class Utilities:
         except KeyboardInterrupt:
             pass 
 
+    @staticmethod
+    def create_directory(directory_name):
+        """Create directory if it doesn't exist"""
+        if not os.path.exists(directory_name):
+            os.makedirs(directory_name)
+
 
 class PasswordHasher:
     @staticmethod
